@@ -1,0 +1,45 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        features: ["", "no-intl"]
+        x86: ["1", "0"]
+        crt_static: ["1", "0"]
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run tests
+      run: |
+        if [[ crt_static = "1" ]]
+        then
+          RUSTFLAGS="-Ctarget-features=+crt-static"
+        else
+          RUSTFLAGS="-Ctarget-features=-crt-static"
+        fi
+
+        if [[ x86 = "1" ]]
+        then
+          NODEJS_TARGET="i686-pc-windows-msvc"
+        else
+          NODEJS_TARGET="x86_64-pc-windows-msvc"
+          RUSTFLAGS="$RUSTFLAGS -Clink-args=/SAFESEH:NO"
+        fi
+        cargo test --verbose --target "$NODEJS_TARGET" --features "$RUST_NODEJS_FEATURES"
+      env:
+        RUST_NODEJS_FEATURES: ${{ matrix.features }}
+      shell: bash
