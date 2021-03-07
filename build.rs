@@ -160,7 +160,7 @@ fn main() -> anyhow::Result<()> {
     let os_specific_libs = match os {
         Ok(TargetOS::Darwin) => vec!["c++"],
         Ok(TargetOS::Linux) => vec!["stdc++"],
-        Ok(TargetOS::Win32) => vec!["dbghelp", "winmm", "iphlpapi", "psapi"],
+        Ok(TargetOS::Win32) => vec!["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"],
         Err(_) => vec![],
     };
 
