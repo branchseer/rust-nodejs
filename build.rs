@@ -154,7 +154,7 @@ fn main() -> anyhow::Result<()> {
             Some(lib_name) => lib_name,
             None => continue,
         };
-        println!("cargo:rustc-link-lib={}", lib_name);
+        println!("cargo:rustc-link-lib=static={}", lib_name);
     }
 
     let os_specific_libs = match os {
