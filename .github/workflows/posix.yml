@@ -1,4 +1,4 @@
-name: Rust
+name: POSIX
 
 on:
   push:
@@ -23,9 +23,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
-      run: cargo test --verbose --features "$RUST_NODEJS_FEATURES"
+      run: cargo test --verbose --features "$NODEJS_CARGO_FEATURES"
       env:
-        RUST_NODEJS_FEATURES: ${{ matrix.features }}
+        NODEJS_CARGO_FEATURES: ${{ matrix.features }}
       shell: bash
   clippy_check:
     runs-on: ubuntu-latest

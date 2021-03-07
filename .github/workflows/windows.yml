@@ -1,4 +1,4 @@
-name: Rust
+name: Windows
 
 on:
   push:
@@ -25,21 +25,23 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run tests
       run: |
-        if [[ crt_static = "1" ]]
+        if [[ $NODEJS_CRT_STATIC = "1" ]]
         then
-          RUSTFLAGS="-Ctarget-features=+crt-static"
+          export RUSTFLAGS="-Ctarget-features=+crt-static"
         else
-          RUSTFLAGS="-Ctarget-features=-crt-static"
+          export RUSTFLAGS="-Ctarget-features=-crt-static"
         fi
 
-        if [[ x86 = "1" ]]
+        if [[ $NODEJS_X86 = "1" ]]
         then
           NODEJS_TARGET="i686-pc-windows-msvc"
+          export RUSTFLAGS="$RUSTFLAGS -Clink-args=/SAFESEH:NO"
         else
           NODEJS_TARGET="x86_64-pc-windows-msvc"
-          RUSTFLAGS="$RUSTFLAGS -Clink-args=/SAFESEH:NO"
         fi
-        cargo test --verbose --target "$NODEJS_TARGET" --features "$RUST_NODEJS_FEATURES"
+        cargo test --verbose --target "$NODEJS_TARGET" --features "$NODEJS_CARGO_FEATURES"
       env:
-        RUST_NODEJS_FEATURES: ${{ matrix.features }}
+        NODEJS_CARGO_FEATURES: ${{ matrix.features }}
+        NODEJS_CRT_STATIC: ${{ matrix.crt_static }}
+        NODEJS_X86: ${{ matrix.x86 }}
       shell: bash
