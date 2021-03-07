@@ -27,9 +27,9 @@ jobs:
       run: |
         if [[ $NODEJS_CRT_STATIC = "1" ]]
         then
-          export RUSTFLAGS="-Ctarget-features=+crt-static"
+          export RUSTFLAGS="-Ctarget-feature=+crt-static"
         else
-          export RUSTFLAGS="-Ctarget-features=-crt-static"
+          export RUSTFLAGS="-Ctarget-feature=-crt-static"
         fi
 
         if [[ $NODEJS_X86 = "1" ]]
