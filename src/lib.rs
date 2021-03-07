@@ -1,7 +1,5 @@
-mod exts;
 mod sys;
 
-pub use exts::NeonContextExt;
 pub use neon;
 use neon::event::EventQueue;
 use once_cell::sync::Lazy;
@@ -83,19 +81,20 @@ pub fn event_queue() -> &'static EventQueue {
 mod tests {
     use super::*;
     use neon::context::Context;
-    use neon::types::JsString;
+    use neon::types::{JsNumber, JsString};
 
     #[test]
     fn test_with_env() -> anyhow::Result<()> {
         let queue = event_queue();
-        let (tx, rx) = std::sync::mpsc::sync_channel::<String>(0);
+        let (tx, rx) = std::sync::mpsc::sync_channel::<i64>(0);
         queue.try_send(move |mut cx| {
-            let s = cx.string("Hello from js");
-            tx.send(s.value(&mut cx)).unwrap();
+            let script_result = cx.run_script("6*7")?;
+            let script_result = script_result.downcast_or_throw::<JsNumber, _>(&mut cx)?;
+            tx.send(script_result.value(&mut cx) as i64).unwrap();
             Ok(())
         })?;
-        let string = rx.recv()?;
-        assert_eq!(string, "Hello from js");
+        let script_result = rx.recv()?;
+        assert_eq!(script_result, 42);
         Ok(())
     }
 
@@ -104,10 +103,7 @@ mod tests {
         let queue = event_queue();
         let (tx, rx) = std::sync::mpsc::sync_channel::<String>(0);
         queue.try_send(move |mut cx| {
-            let hostname = cx
-                .run("return new URL('http://中文').hostname")
-                .ok()
-                .unwrap();
+            let hostname = cx.run_script("new URL('http://中文').hostname")?;
             let hostname = hostname.downcast_or_throw::<JsString, _>(&mut cx)?;
             tx.send(hostname.value(&mut cx)).unwrap();
             Ok(())
