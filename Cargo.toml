@@ -5,7 +5,7 @@ authors = ["patr0nus <dk4rest@gmail.com>"]
 edition = "2018"
 
 [patch.crates-io]
-neon = { git = 'https://github.com/patr0nus/neon', branch = "napi-embedding" }
+neon = { git = 'https://github.com/patr0nus/neon', branch = "rust_nodejs" }
 
 [features]
 no-intl = []
