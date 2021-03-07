@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       env:
         RUST_NODEJS_FEATURES: ${{ matrix.features }}
-      run: cargo test --verbose --features $RUST_NODEJS_FEATURES
+      run: cargo test --verbose --features "$RUST_NODEJS_FEATURES"
   clippy_check:
     runs-on: ubuntu-latest
     steps:
