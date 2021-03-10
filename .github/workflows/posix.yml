@@ -23,9 +23,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
-      run: cargo test --verbose --features "$NODEJS_CARGO_FEATURES"
+      run: cargo test --verbose --release --features "$NODEJS_CARGO_FEATURES"
       env:
         NODEJS_CARGO_FEATURES: ${{ matrix.features }}
+        RUSTFLAGS: "-Clink-args=-rdynamic"
       shell: bash
   clippy_check:
     runs-on: ubuntu-latest

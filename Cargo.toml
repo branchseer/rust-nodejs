@@ -15,9 +15,9 @@ paste = "1"
 
 [dependencies.neon]
 git = 'https://github.com/patr0nus/neon'
-branch = "rust_nodejs"
+branch = "main"
 default-features = false
-features = [ "napi-6", "event-queue-api",  "try-catch-api", "napi-embedding" ]
+features = [ "napi-6", "event-queue-api",  "try-catch-api" ]
 
 [dev-dependencies]
 anyhow = "1"
