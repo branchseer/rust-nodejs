@@ -40,7 +40,7 @@ jobs:
         else
           NODEJS_TARGET="x86_64-pc-windows-msvc"
         fi
-        cargo test --verbose --target "$NODEJS_TARGET" --features "$NODEJS_CARGO_FEATURES"
+        cargo test --verbose --release --target "$NODEJS_TARGET" --features "$NODEJS_CARGO_FEATURES"
       env:
         NODEJS_CARGO_FEATURES: ${{ matrix.features }}
         NODEJS_CRT_STATIC: ${{ matrix.crt_static }}
