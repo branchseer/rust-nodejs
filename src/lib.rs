@@ -80,15 +80,19 @@ pub fn event_queue() -> &'static EventQueue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neon::context::Context;
-    use neon::types::{JsNumber, JsString};
+    use neon::{
+        context::Context,
+        types::{JsNumber, JsString},
+        reflect::eval,
+    };
 
     #[test]
     fn test_with_env() -> anyhow::Result<()> {
         let queue = event_queue();
         let (tx, rx) = std::sync::mpsc::sync_channel::<i64>(0);
         queue.try_send(move |mut cx| {
-            let script_result = cx.run_script("6*7")?;
+            let script = cx.string("6*7");
+            let script_result = eval(&mut cx, script)?;
             let script_result = script_result.downcast_or_throw::<JsNumber, _>(&mut cx)?;
             tx.send(script_result.value(&mut cx) as i64).unwrap();
             Ok(())
@@ -103,7 +107,9 @@ mod tests {
         let queue = event_queue();
         let (tx, rx) = std::sync::mpsc::sync_channel::<String>(0);
         queue.try_send(move |mut cx| {
-            let hostname = cx.run_script("new URL('http://中文').hostname")?;
+            let script = cx.string("new URL('http://中文').hostname");
+            let hostname = eval(&mut cx, script)?;
+
             let hostname = hostname.downcast_or_throw::<JsString, _>(&mut cx)?;
             tx.send(hostname.value(&mut cx)).unwrap();
             Ok(())
