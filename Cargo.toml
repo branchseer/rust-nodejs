@@ -2,8 +2,10 @@
 name = "nodejs"
 version = "0.1.0"
 authors = ["patr0nus <dk4rest@gmail.com>"]
+license = "MIT"
+description = "Embedding Node.js in Rust"
 edition = "2018"
-
+keywords = [ "node", "nodejs", "js", "javascript", "embedding" ]
 [features]
 no-intl = []
 
