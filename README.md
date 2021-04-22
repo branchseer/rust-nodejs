@@ -5,7 +5,7 @@ Embedding Node.js in Rust.
 - Provide a global thread-safe Node.js event queue.
 - Interact with the Node.js runtime via [Neon](https://neon-bindings.com) API.
 - Link with [prebuilt Node.js binaries](https://github.com/patr0nus/libnode/) to save compile time.
-- Loading native modules is supported.
+- Native modules are supported.
 
 ## Usage
 
