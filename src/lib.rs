@@ -73,6 +73,7 @@ static QUEUE: Lazy<EventQueue> = Lazy::new(|| {
     queue
 });
 
+/// Ensure the Node.js runtime is running and return the event queue.
 pub fn event_queue() -> &'static EventQueue {
     QUEUE.deref()
 }
@@ -82,8 +83,8 @@ mod tests {
     use super::*;
     use neon::{
         context::Context,
-        types::{JsNumber, JsString},
         reflect::eval,
+        types::{JsNumber, JsString},
     };
 
     #[test]
