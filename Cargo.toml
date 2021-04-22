@@ -6,6 +6,9 @@ license = "MIT"
 description = "Embedding Node.js in Rust"
 edition = "2018"
 keywords = [ "node", "nodejs", "js", "javascript", "embedding" ]
+homepage = "https://github.com/patr0nus/rust-nodejs"
+repository = "https://github.com/patr0nus/rust-nodejs"
+
 [features]
 no-intl = []
 
