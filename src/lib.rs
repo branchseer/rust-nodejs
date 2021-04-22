@@ -1,8 +1,5 @@
 mod sys;
 
-#[cfg(not(target_os = "windows"))]
-mod napi_symbols;
-
 pub use neon;
 use neon::event::EventQueue;
 use once_cell::sync::Lazy;
@@ -77,10 +74,6 @@ static QUEUE: Lazy<EventQueue> = Lazy::new(|| {
 });
 
 pub fn event_queue() -> &'static EventQueue {
-    #[cfg(not(target_os = "windows"))]
-    {
-        let _napi_symbols = napi_symbols::napi_symbols();
-    }
     QUEUE.deref()
 }
 
