@@ -97,6 +97,10 @@ fn download(url: &str, path: &Path) -> anyhow::Result<()> {
 }
 
 fn main() -> anyhow::Result<()> {
+    // Make docs.rs build pass
+    if env::var_os("DOCS_RS").is_some() {
+        return Ok(());
+    }
     let os = match env::var("CARGO_CFG_TARGET_OS")?.as_str() {
         "macos" => Ok(TargetOS::Darwin),
         "windows" => Ok(TargetOS::Win32),
