@@ -68,11 +68,11 @@ static CHANNEL: Lazy<Channel> = Lazy::new(|| {
         }
         panic!("Node.js runtime closed expectedly")
     });
-    let queue = CHANNEL_TX_RX.1.lock().unwrap().recv().unwrap();
-    queue
+    let channel = CHANNEL_TX_RX.1.lock().unwrap().recv().unwrap();
+    channel
 });
 
-/// Ensure the Node.js runtime is running and return the event queue.
+/// Ensure the Node.js runtime is running and return the channel.
 pub fn channel() -> &'static Channel {
     CHANNEL.deref()
 }

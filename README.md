@@ -2,7 +2,7 @@
 
 Embedding Node.js in Rust.  
 
-- Provide a global thread-safe Node.js event queue.
+- Provide a global thread-safe Node.js channel.
 - Interact with the Node.js runtime via [Neon](https://neon-bindings.com) API.
 - Link with [prebuilt Node.js binaries](https://github.com/patr0nus/libnode/) to save compile time.
 - Native modules are supported.
@@ -14,9 +14,9 @@ Embedding Node.js in Rust.
 [dependencies]
 nodejs = "0.1.1"
 ```
-2. `let queue = nodejs::event_queue()` to get the global Node.js event queue.
-3. Call `queue.send` to run tasks in the Node.js event queue
-4. Inside the task, use `nodejs::neon` for interoperability between Node.js and Rust. [Neon documentation](https://docs.rs/neon/0.8.0-napi/neon/index.html)
+2. `let channel = nodejs::channel()` to get the global Node.js channel.
+3. Call `channel.send` to run tasks in the Node.js event queue
+4. Inside the task, use `nodejs::neon` for interoperability between Node.js and Rust. [Neon documentation](https://docs.rs/neon/0.9.0/neon/index.html)
 5. On macOS or Linux, add `-Clink-args=-rdynamic` to `rustflags` when building your Rust application.
 
 ## Example
