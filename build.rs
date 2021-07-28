@@ -90,9 +90,8 @@ fn get_sha1_of_filename(filename: &str) -> Option<&'static str> {
 }
 
 fn download(url: &str, path: &Path) -> anyhow::Result<()> {
-    let mut file = File::create(path)?;
-    let mut resp = reqwest::blocking::get(url)?;
-    resp.copy_to(&mut file)?;
+    let file = File::create(path)?;
+    let _ = attohttpc::get(url).send()?.write_to(file)?;
     Ok(())
 }
 
