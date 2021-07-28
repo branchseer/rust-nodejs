@@ -1,7 +1,7 @@
 mod sys;
 
 pub use neon;
-use neon::event::EventQueue;
+use neon::event::Channel;
 use once_cell::sync::Lazy;
 use std::env::current_exe;
 use std::ffi::CString;
@@ -11,26 +11,25 @@ use std::ptr::null_mut;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 use std::sync::Mutex;
 
-static QUEUE_CHANNEL: Lazy<(SyncSender<EventQueue>, Mutex<Receiver<EventQueue>>)> =
-    Lazy::new(|| {
-        let (tx, rx) = sync_channel(0);
-        (tx, Mutex::new(rx))
-    });
+static CHANNEL_TX_RX: Lazy<(SyncSender<Channel>, Mutex<Receiver<Channel>>)> = Lazy::new(|| {
+    let (tx, rx) = sync_channel(0);
+    (tx, Mutex::new(rx))
+});
 
 #[allow(clippy::unnecessary_wraps)]
 mod linked_binding {
-    use super::QUEUE_CHANNEL;
+    use super::CHANNEL_TX_RX;
     use neon::context::Context;
     use std::sync::Once;
 
     neon::register_module!(|mut cx| {
         static ONCE: Once = Once::new();
-        ONCE.call_once(|| QUEUE_CHANNEL.0.send(cx.queue()).unwrap());
+        ONCE.call_once(|| CHANNEL_TX_RX.0.send(cx.channel()).unwrap());
         Ok(())
     });
 }
 
-static QUEUE: Lazy<EventQueue> = Lazy::new(|| {
+static CHANNEL: Lazy<Channel> = Lazy::new(|| {
     std::thread::spawn(|| {
         const LINKED_BINDING_NAME: &str = "__rust_init";
 
@@ -69,13 +68,13 @@ static QUEUE: Lazy<EventQueue> = Lazy::new(|| {
         }
         panic!("Node.js runtime closed expectedly")
     });
-    let queue = QUEUE_CHANNEL.1.lock().unwrap().recv().unwrap();
+    let queue = CHANNEL_TX_RX.1.lock().unwrap().recv().unwrap();
     queue
 });
 
 /// Ensure the Node.js runtime is running and return the event queue.
-pub fn event_queue() -> &'static EventQueue {
-    QUEUE.deref()
+pub fn channel() -> &'static Channel {
+    CHANNEL.deref()
 }
 
 #[cfg(test)]
@@ -89,9 +88,9 @@ mod tests {
 
     #[test]
     fn test_with_env() -> anyhow::Result<()> {
-        let queue = event_queue();
+        let channel = channel();
         let (tx, rx) = std::sync::mpsc::sync_channel::<i64>(0);
-        queue.try_send(move |mut cx| {
+        channel.try_send(move |mut cx| {
             let script = cx.string("6*7");
             let script_result = eval(&mut cx, script)?;
             let script_result = script_result.downcast_or_throw::<JsNumber, _>(&mut cx)?;
@@ -105,9 +104,9 @@ mod tests {
 
     #[test]
     fn test_intl() -> anyhow::Result<()> {
-        let queue = event_queue();
+        let channel = channel();
         let (tx, rx) = std::sync::mpsc::sync_channel::<String>(0);
-        queue.try_send(move |mut cx| {
+        channel.try_send(move |mut cx| {
             let script = cx.string("new URL('http://中文').hostname");
             let hostname = eval(&mut cx, script)?;
 
