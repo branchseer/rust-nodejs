@@ -12,7 +12,7 @@ Embedding Node.js in Rust.
 1. Add rust-nodejs to your cargo project:
 ```toml
 [dependencies]
-nodejs = "0.1.1"
+nodejs = "0.2.0"
 ```
 2. `let channel = nodejs::channel()` to get the global Node.js channel.
 3. Call `channel.send` to run tasks in the Node.js event queue
