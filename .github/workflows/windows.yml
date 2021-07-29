@@ -36,7 +36,6 @@ jobs:
         then
           NODEJS_TARGET="i686-pc-windows-msvc"
           rustup target add $NODEJS_TARGET
-          export RUSTFLAGS="$RUSTFLAGS -Clink-args=/SAFESEH:NO"
         else
           NODEJS_TARGET="x86_64-pc-windows-msvc"
         fi

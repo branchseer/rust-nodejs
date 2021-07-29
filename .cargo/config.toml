@@ -1,0 +1,11 @@
+[target.x86_64-apple-darwin]
+rustflags = [ "-Clink-args=-rdynamic" ]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = [ "-Clink-args=-rdynamic" ]
+
+[target.i686-unknown-linux-gnu]
+rustflags = [ "-Clink-args=-rdynamic" ]
+
+[target.i686-pc-windows-msvc]
+rustflags = [ "-Clink-args=/SAFESEH:NO" ]

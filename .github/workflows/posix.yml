@@ -26,7 +26,6 @@ jobs:
       run: cargo test --verbose --release --features "$NODEJS_CARGO_FEATURES"
       env:
         NODEJS_CARGO_FEATURES: ${{ matrix.features }}
-        RUSTFLAGS: "-Clink-args=-rdynamic"
       shell: bash
   clippy_check:
     runs-on: ubuntu-latest

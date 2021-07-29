@@ -7,17 +7,12 @@ Embedding Node.js in Rust.
 - Link with [prebuilt Node.js binaries](https://github.com/patr0nus/libnode/) to save compile time.
 - Native modules are supported.
 
-## Usage
+## Guide
 
-1. Add rust-nodejs to your cargo project:
-```toml
-[dependencies]
-nodejs = "0.2.0"
-```
+1. Copy this repo's ".cargo" folder to your cargo project to enable flags required to link Node.js properly. 
 2. `let channel = nodejs::channel()` to get the global Node.js channel.
-3. Call `channel.send` to run tasks in the Node.js event queue
+3. Call `channel.send` to run tasks in the Node.js event queue.
 4. Inside the task, use `nodejs::neon` for interoperability between Node.js and Rust. [Neon documentation](https://docs.rs/neon/0.9.0/neon/index.html)
-5. On macOS or Linux, add `-Clink-args=-rdynamic` to `rustflags` when building your Rust application.
 
 ## Example
 ```rust
