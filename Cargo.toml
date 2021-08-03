@@ -9,10 +9,12 @@ keywords = [ "node", "nodejs", "js", "javascript", "embedding" ]
 homepage = "https://github.com/patr0nus/rust-nodejs"
 repository = "https://github.com/patr0nus/rust-nodejs"
 
+[lib]
+doctest = false # Doc-tests would fail because it doesn't read rustflags in .config.toml: https://github.com/rust-lang/cargo/issues/6650
+
 [features]
 no-intl = []
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 napi-sys = { version = "1", features = [ "napi7" ]}
 neon = { version = "0.9.0", default-features = false, features = [ "napi-6", "channel-api",  "try-catch-api" ] }
