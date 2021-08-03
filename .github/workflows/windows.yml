@@ -15,6 +15,7 @@ env:
 
 jobs:
   test:
+    continue-on-error: true
     strategy:
       matrix:
         features: ["", "no-intl"]
