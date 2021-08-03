@@ -18,21 +18,26 @@ jobs:
     strategy:
       matrix:
         features: ["", "no-intl"]
-        x86: ["1", "0"]
-        crt_static: ["1", "0"]
+        arch: ["x86", "x64"]
+        crt: ["crt-static", "crt-dynamic"]
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
+      env:
+        RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
+        RS_NODEJS_CRT: ${{ matrix.crt }}
+        RS_NODEJS_ARCH: ${{ matrix.arch }}
+      shell: bash
       run: |
-        if [[ $NODEJS_CRT_STATIC = "1" ]]
+        if [[ $NODEJS_CRT = "crt-static" ]]
         then
           export RUSTFLAGS="-Ctarget-feature=+crt-static"
         else
           export RUSTFLAGS="-Ctarget-feature=-crt-static"
         fi
 
-        if [[ $NODEJS_X86 = "1" ]]
+        if [[ $RS_NODEJS_ARCH = "x86" ]]
         then
           NODEJS_TARGET="i686-pc-windows-msvc"
           rustup target add $NODEJS_TARGET
@@ -40,8 +45,3 @@ jobs:
           NODEJS_TARGET="x86_64-pc-windows-msvc"
         fi
         cargo test --verbose --release --target "$NODEJS_TARGET" --features "$NODEJS_CARGO_FEATURES"
-      env:
-        NODEJS_CARGO_FEATURES: ${{ matrix.features }}
-        NODEJS_CRT_STATIC: ${{ matrix.crt_static }}
-        NODEJS_X86: ${{ matrix.x86 }}
-      shell: bash
