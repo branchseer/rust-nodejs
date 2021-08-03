@@ -13,11 +13,14 @@ fn test_require_napi_module() -> anyhow::Result<()> {
     let napi_module_src_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("napi_module");
-    let npm_install_status = std::process::Command::new("npm")
-        .arg("install")
-        .arg(napi_module_src_dir)
+    let npm_install_cmd = std::process::Command::new("npm")
         .current_dir(test_tmpdir)
-        .status()?;
+        .arg("install")
+        .arg(napi_module_src_dir);
+    if cfg!(target_arch = "x86") {
+        npm_install_cmd.arg("--target_arch=ia32")
+    }
+    let npm_install_status = npm_install_cmd.status()?;
     assert!(npm_install_status.success());
 
     let require_from = PathBuf::from(test_tmpdir)
