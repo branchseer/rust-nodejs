@@ -1,0 +1,24 @@
+name: Clippy Check
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: rustup component add clippy
+      - uses: actions-rs/clippy-check@v1
+        with:
+          args: --all-features

@@ -1,4 +1,4 @@
-name: POSIX
+name: POSIX Test
 
 on:
   push:
@@ -23,16 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
-      run: cargo test --verbose --release --features "$NODEJS_CARGO_FEATURES"
-      env:
-        NODEJS_CARGO_FEATURES: ${{ matrix.features }}
       shell: bash
-  clippy_check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - run: rustup component add clippy
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
+      env:
+        RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
+      run: cargo test --verbose --release --features "$RS_NODEJS_CARGO_FEATURES"
