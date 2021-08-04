@@ -8,5 +8,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: |
-        cargo install release
+        cargo install cargo-release
         cargo release -v --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
