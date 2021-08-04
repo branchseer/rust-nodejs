@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    continue-on-error: true
+    strategy:
+      matrix:
+        target: [
+            x86_64-apple-darwin,
+            x86_64-unknown-linux-gnu,
+            x86_64-pc-windows-msvc,
+            i686-pc-windows-msvc
+        ]
+        features: [ "", "no-intl" ]
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-10.15
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-18.04
+          - target: x86_64-pc-windows-msvc
+            os: windows-2019
+          - target: i686-pc-windows-msvc
+            os: windows-2019
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - name: Run tests
+      env:
+        RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
+        RS_NODEJS_CARGO_TARGET: ${{ matrix.target }}
+      shell: bash
+      run: |
+        rustup target add $RS_NODEJS_CARGO_TARGET
+        cargo test --verbose --release --target $RS_NODEJS_CARGO_TARGET --features "$RS_NODEJS_CARGO_FEATURES"
