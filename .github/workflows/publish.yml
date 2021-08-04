@@ -8,5 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: |
+        git config --global user.email "dk4rest@gmail.com"
+        git config --global user.name "patr0nus"
         cargo install cargo-release
         cargo release -v --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
