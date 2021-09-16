@@ -36,4 +36,4 @@ strum = { version = "0.20", features = [ "derive" ] }
 [build-dependencies.attohttpc]
 version = "0.17"
 default-features = false # No need for the compress feature
-features = [ "tls" ]
+features = [ "tls-rustls" ]
