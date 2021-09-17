@@ -106,6 +106,11 @@ fn main() -> anyhow::Result<()> {
         "linux" => Ok(TargetOS::Linux),
         other => Err(other.to_string()),
     };
+    let arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
+        "x86" => Ok(TargetArch::X86),
+        "x86_64" => Ok(TargetArch::X64),
+        other => Err(other.to_string())
+    };
     if let Ok(TargetOS::Win32) = os {
         let target_env = env::var("CARGO_CFG_TARGET_ENV")?;
         if target_env != "msvc" { // Can't link to Nodejs under windows-gnu
@@ -117,15 +122,14 @@ fn main() -> anyhow::Result<()> {
         println!("cargo:rerun-if-changed={}", lib_path_from_env);
         lib_path_from_env
     } else {
-        let os = os
-            .clone()
-            .map_err(|other| anyhow::anyhow!("Unsupported target arch: {}", other))?;
         let config = Config {
-            os,
-            arch: match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
-                "x86" => TargetArch::X86,
-                "x86_64" => TargetArch::X64,
-                other => anyhow::bail!("Unsupported target arch: {}", other),
+            os: match os.clone() {
+                Ok(os) => os,
+                Err(other) => anyhow::bail!("Unsupported target os: {}", other),
+            },
+            arch: match arch.clone() {
+                Ok(arch) => arch,
+                Err(other) => anyhow::bail!("Unsupported target arch: {}", other),
             },
             no_intl: env::var("CARGO_FEATURE_NO_INTL").is_ok(),
         };
@@ -172,9 +176,21 @@ fn main() -> anyhow::Result<()> {
         Ok(TargetOS::Win32) => vec!["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"],
         Err(_) => vec![],
     };
-
     for lib_name in os_specific_libs {
         println!("cargo:rustc-link-lib={}", lib_name);
+    }
+
+    let link_args = match os {
+        Ok(TargetOS::Darwin | TargetOS::Linux) => vec!["-rdynamic"],
+        Ok(TargetOS::Win32) => match arch {
+            Ok(TargetArch::X86) => vec!["-Clink-args=/SAFESEH:NO"],
+            _ => vec![]
+        },
+        _ => vec![]
+    };
+
+    for link_arg in link_args {
+        println!("cargo:rustc-link-arg={}", link_arg);
     }
 
     Ok(())
