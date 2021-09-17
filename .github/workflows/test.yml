@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: beta
     - name: Run tests
       env:
         RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
