@@ -40,6 +40,7 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: beta
+        default: true
     - name: Run tests
       env:
         RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
