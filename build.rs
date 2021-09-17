@@ -183,7 +183,7 @@ fn main() -> anyhow::Result<()> {
     let link_args = match os {
         Ok(TargetOS::Darwin | TargetOS::Linux) => vec!["-rdynamic"],
         Ok(TargetOS::Win32) => match arch {
-            Ok(TargetArch::X86) => vec!["-Clink-args=/SAFESEH:NO"],
+            Ok(TargetArch::X86) => vec!["/SAFESEH:NO"],
             _ => vec![]
         },
         _ => vec![]
