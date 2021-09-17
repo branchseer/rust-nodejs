@@ -106,6 +106,12 @@ fn main() -> anyhow::Result<()> {
         "linux" => Ok(TargetOS::Linux),
         other => Err(other.to_string()),
     };
+    if let Ok(TargetOS::Win32) = os {
+        let target_env = env::var("CARGO_CFG_TARGET_ENV")?;
+        if target_env != "msvc" { // Can't link to Nodejs under windows-gnu
+            anyhow::bail!("Unsupported Environment ABI: {}", target_env)
+        }
+    }
     println!("cargo:rerun-if-env-changed=LIBNODE_LIB_PATH");
     let lib_path = if let Ok(lib_path_from_env) = env::var("LIBNODE_LIB_PATH") {
         println!("cargo:rerun-if-changed={}", lib_path_from_env);
