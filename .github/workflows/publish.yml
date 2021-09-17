@@ -10,5 +10,5 @@ jobs:
     - run: |
         git config --global user.email "dk4rest@gmail.com"
         git config --global user.name "patr0nus"
-        cargo install cargo-release
-        cargo release -v --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        cargo install --version=~0.17 cargo-release
+        cargo release -v --execute --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
