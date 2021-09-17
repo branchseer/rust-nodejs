@@ -1,12 +1,12 @@
 name: Publish
 
-on: workflow_dispatch
-
-inputs:
-  bumpLevel:
-    description: cargo-release bump level
-    required: true
-    default: 'release'
+on:
+  workflow_dispatch:
+    inputs:
+      bumpLevel:
+        description: cargo-release bump level
+        required: true
+        default: 'release'
 
 jobs:
   publish:
