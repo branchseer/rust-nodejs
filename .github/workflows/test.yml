@@ -41,6 +41,7 @@ jobs:
       with:
         toolchain: beta
         default: true
+        profile: minimal
     - name: Run tests
       env:
         RS_NODEJS_CARGO_FEATURES: ${{ matrix.features }}
