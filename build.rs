@@ -109,11 +109,12 @@ fn main() -> anyhow::Result<()> {
     let arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "x86" => Ok(TargetArch::X86),
         "x86_64" => Ok(TargetArch::X64),
-        other => Err(other.to_string())
+        other => Err(other.to_string()),
     };
     if let Ok(TargetOS::Win32) = os {
         let target_env = env::var("CARGO_CFG_TARGET_ENV")?;
-        if target_env != "msvc" { // Can't link to Nodejs under windows-gnu
+        if target_env != "msvc" {
+            // Can't link to Nodejs under windows-gnu
             anyhow::bail!("Unsupported Environment ABI: {}", target_env)
         }
     }
@@ -178,19 +179,6 @@ fn main() -> anyhow::Result<()> {
     };
     for lib_name in os_specific_libs {
         println!("cargo:rustc-link-lib={}", lib_name);
-    }
-
-    let link_args = match os {
-        Ok(TargetOS::Darwin | TargetOS::Linux) => vec!["-rdynamic"],
-        Ok(TargetOS::Win32) => match arch {
-            Ok(TargetArch::X86) => vec!["/SAFESEH:NO"],
-            _ => vec![]
-        },
-        _ => vec![]
-    };
-
-    for link_arg in link_args {
-        println!("cargo:rustc-link-arg={}", link_arg);
     }
 
     Ok(())
