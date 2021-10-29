@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      nodeVersion:
+        description: "Node.js version"
+        required: true
+
+env:
+  LIBNODE_NODE_VERSION: ${{ github.event.inputs.nodeVersion }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-11, windows-2019, ubuntu-20.04]
+        x86: [0, 1]
+        small_icu: [0, 1]
+        exclude:
+          - os: macos-11
+            x86: 1
+          - os: ubuntu-20.04
+            x86: 1
+    runs-on: ${{ matrix.os }}
+    env:
+      LIBNODE_X86: ${{ matrix.x86 }}
+      LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install nasm on Windows
+        run: choco install -y nasm
+        if: runner.os == 'Windows'
+
+      - name: Install GNU patch on Windows
+        run: choco install -y patch
+        if: runner.os == 'Windows'
+
+      - name: Install ninja on macOS
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja
+        if: runner.os == 'macOS'
+
+      - name: Install ninja on Ubuntu
+        run: sudo apt-get install -y ninja-build
+        if: runner.os == 'Linux'
+
+      - name: Download source code of Node.js
+        run: python -m scripts.download
+
+      - name: Patch source code of Node.js
+        run: python -m scripts.patch
+
+      - name: Build
+        run: python -m scripts.build
+
+      - name: Copy headers
+        run: python -m scripts.headers
+
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Postprocess
+        run: python -m scripts.postproc
+
+      - name: Archive
+        run: |
+          zipname=$(python -m scripts.archive)
+          echo "::set-output name=zipname::$zipname"
+        shell: bash
+        id: archive
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.archive.outputs.zipname }}
+          path: ${{ steps.archive.outputs.zipname }}
+
+      - name: Test
+        run: python -m scripts.test
+        
+  gh_release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+      - name: Compute checksums
+        run: |
+          mkdir zips
+          mv ./*/*.zip ./zips
+          cd zips
+          echo '## SHA-1 Checksums' > ../release_notes.md
+          echo '```' >> ../release_notes.md
+          sha1sum --binary *.zip >> ../release_notes.md
+          echo '```' >> ../release_notes.md
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.LIBNODE_NODE_VERSION }}
+          release_name: ${{ env.LIBNODE_NODE_VERSION }}
+          body_path: release_notes.md
+      - name: Upload release assets
+        uses: csexton/release-asset-action@v2
+        with:
+          pattern: "zips/*.zip"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ steps.create_release.outputs.upload_url }}

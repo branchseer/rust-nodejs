@@ -8,7 +8,7 @@ edition = "2018"
 keywords = [ "node", "nodejs", "js", "javascript", "embedding" ]
 homepage = "https://github.com/patr0nus/rust-nodejs"
 repository = "https://github.com/patr0nus/rust-nodejs"
-exclude = [ "/.cargo", "/.github" ]
+exclude = [ "/.cargo", "/.github", "/libnode" ]
 
 [lib]
 doctest = false # Doc-tests would fail because it doesn't read rustflags in .config.toml: https://github.com/rust-lang/cargo/issues/6650
