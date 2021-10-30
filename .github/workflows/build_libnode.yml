@@ -59,6 +59,7 @@ jobs:
         run: python -m scripts.patch
 
       - name: Build
+        shell: bash
         run: |
           if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             export CC=gcc-9
