@@ -73,9 +73,9 @@ jobs:
           name: ${{ steps.archive.outputs.zipname }}
           path: ${{ steps.archive.outputs.zipname }}
 
-      - name: Test
-        if: ${{ matrix.arch != "arm64" }}
-        run: python -m scripts.test
+#      - name: Test
+#        if: ${{ matrix.arch != "arm64" }}
+#        run: python -m scripts.test
         
   gh_release:
     needs: build
