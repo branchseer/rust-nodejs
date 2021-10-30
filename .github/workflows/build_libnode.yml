@@ -31,6 +31,8 @@ jobs:
     env:
       LIBNODE_ARCH: ${{ matrix.arch }}
       LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
+      CC: ${{ matrix.os == 'ubuntu-18.04' && 'gcc-9' || '' }}
+      CXX: ${{ matrix.os == 'ubuntu-18.04' && 'g++-9' || '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -46,6 +48,9 @@ jobs:
       - name: Install GNU patch on Windows
         run: choco install -y patch
         if: runner.os == 'Windows'
+
+      - name: Install rust-bindgen
+        run: cargo install bindgen
 
       - name: Download source code of Node.js
         run: python -m scripts.download
