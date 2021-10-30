@@ -27,6 +27,8 @@ jobs:
             arch: x86
           - os: ubuntu-18.04
             arch: x86
+          - os: ubuntu-18.04
+            arch: arm64
     runs-on: ${{ matrix.os }}
     env:
       LIBNODE_ARCH: ${{ matrix.arch }}
