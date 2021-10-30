@@ -8,7 +8,7 @@ from . import config
 zipBasename = 'libnode-{}-{}-{}{}'.format(
     config.nodeVersion,
     sys.platform,
-    'x86' if config.x86 else 'x64',
+    config.arch,
     config.zipBasenameSuffix
 )
 

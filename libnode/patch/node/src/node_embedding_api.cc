@@ -3,8 +3,11 @@
 #include <memory>
 #include <optional>
 
-#include "node.h"
 #include "node_embedding_api.h"
+
+#include "node.h"
+#include "node_api.h"
+
 #include "uv.h"
 
 #include "v8.h"
@@ -127,7 +130,10 @@ extern "C" {
         v8::V8::InitializePlatform(platform.get());
         v8::V8::Initialize();
 
-        node_run_result_t result = RunNodeInstance(platform.get(), process_args, exec_args, options.napi_reg_func);
+        node_run_result_t result = RunNodeInstance(
+            platform.get(), process_args, exec_args,
+            napi_addon_register_func(options.napi_reg_func)
+        );
 
         v8::V8::Dispose();
         v8::V8::ShutdownPlatform();

@@ -1,5 +1,3 @@
-assert __name__ == "__main__"
-
 import sys
 import os
 import shutil
@@ -8,7 +6,7 @@ import glob
 
 from . import config
 
-
+assert __name__ == "__main__"
 
 nodeSrcFolder = 'node-{}'.format(config.nodeVersion)
 resultFolder = 'libnode'
@@ -18,6 +16,19 @@ libFolder = os.path.join(resultFolder, 'lib')
 shutil.rmtree(resultFolder, ignore_errors=True)
 
 os.mkdir(resultFolder)
+
+header_path = os.path.realpath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..", "patch", "node", "src", "node_embedding_api.h"
+    )
+)
+subprocess.check_call([
+    "bindgen", "--allowlist-function", "^node_.*", header_path,
+    "--output", os.path.join(resultFolder, "sys.rs"),
+    "--", "-target", config.target_triple
+])
+
 os.mkdir(libFolder)
 
 def filterLibFile(filename):
@@ -63,9 +74,3 @@ else:
         'ar', 'cr', 
         os.path.join(libFolder, "libnode_snapshot.a")
     ] + glob.glob(additional_obj_glob))
-
-shutil.copytree(os.path.join(nodeSrcFolder, 'include'), os.path.join(resultFolder, 'include'))
-shutil.copyfile('CMakeLists.txt', os.path.join(resultFolder, 'CMakeLists.txt'))
-
-with open(os.path.join(resultFolder, 'dummy.c'), "w") as dummy_c_file:
-    print("void libnode_dummy_func() { }", file=dummy_c_file)

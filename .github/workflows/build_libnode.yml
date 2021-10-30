@@ -1,4 +1,4 @@
-name: Release
+name: Build libnode
 
 on:
   workflow_dispatch:
@@ -10,22 +10,26 @@ on:
 env:
   LIBNODE_NODE_VERSION: ${{ github.event.inputs.nodeVersion }}
 
+defaults:
+  run:
+    working-directory: libnode
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, windows-2019, ubuntu-20.04]
-        x86: [0, 1]
+        os: [macos-11, windows-2019, ubuntu-18.04]
+        arch: [x86, x64, arm64]
         small_icu: [0, 1]
         exclude:
           - os: macos-11
-            x86: 1
-          - os: ubuntu-20.04
-            x86: 1
+            arch: x86
+          - os: ubuntu-18.04
+            arch: x86
     runs-on: ${{ matrix.os }}
     env:
-      LIBNODE_X86: ${{ matrix.x86 }}
+      LIBNODE_ARCH: ${{ matrix.arch }}
       LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
     steps:
       - name: Checkout code
@@ -43,14 +47,6 @@ jobs:
         run: choco install -y patch
         if: runner.os == 'Windows'
 
-      - name: Install ninja on macOS
-        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja
-        if: runner.os == 'macOS'
-
-      - name: Install ninja on Ubuntu
-        run: sudo apt-get install -y ninja-build
-        if: runner.os == 'Linux'
-
       - name: Download source code of Node.js
         run: python -m scripts.download
 
@@ -59,9 +55,6 @@ jobs:
 
       - name: Build
         run: python -m scripts.build
-
-      - name: Copy headers
-        run: python -m scripts.headers
 
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Postprocess
@@ -81,6 +74,7 @@ jobs:
           path: ${{ steps.archive.outputs.zipname }}
 
       - name: Test
+        if: ${{ matrix.arch != "arm64" }}
         run: python -m scripts.test
         
   gh_release:
@@ -94,9 +88,9 @@ jobs:
           mkdir zips
           mv ./*/*.zip ./zips
           cd zips
-          echo '## SHA-1 Checksums' > ../release_notes.md
+          echo '## SHA256 Checksums' > ../release_notes.md
           echo '```' >> ../release_notes.md
-          sha1sum --binary *.zip >> ../release_notes.md
+          sha256sum --binary *.zip >> ../release_notes.md
           echo '```' >> ../release_notes.md
       - name: Create release
         id: create_release
