@@ -37,4 +37,4 @@ zipBasenameSuffix = os.environ.get('LIBNODE_ZIP_SUFFIX', '')
 
 if os.environ.get('LIBNODE_SMALL_ICU', '') == '1':
 	configFlags += ['--with-intl=small-icu']
-	zipBasenameSuffix += '-smallicu'
+	zipBasenameSuffix += '-small_icu'

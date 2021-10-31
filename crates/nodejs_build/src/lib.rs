@@ -1,8 +1,12 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+use std::env;
+
+pub fn configure() {
+    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
+        if env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "x86" {
+            println!("cargo:rustc-link-arg-bins=/SAFESEH:NO")
+        }
+    }
+    else {
+        println!("cargo:rustc-link-arg-bins=-rdynamic")
     }
 }

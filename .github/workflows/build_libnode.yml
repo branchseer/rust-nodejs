@@ -106,8 +106,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.LIBNODE_NODE_VERSION }}
-          release_name: ${{ env.LIBNODE_NODE_VERSION }}
+          tag_name: "libnode-${{ env.LIBNODE_NODE_VERSION }}"
+          release_name: "libnode-${{ env.LIBNODE_NODE_VERSION }}"
           body_path: release_notes.md
       - name: Upload release assets
         uses: csexton/release-asset-action@v2

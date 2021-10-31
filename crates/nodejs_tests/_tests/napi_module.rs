@@ -12,7 +12,7 @@ use fs_extra::dir::{CopyOptions, copy};
 fn test_require_napi_module() -> anyhow::Result<()> {
     let test_tmpdir = env!("CARGO_TARGET_TMPDIR");
     let napi_module_src_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
+        .join("_tests")
         .join("napi_module");
 
     let napi_module_installed_dir = PathBuf::from(test_tmpdir)

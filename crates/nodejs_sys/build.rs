@@ -26,7 +26,7 @@ enum TargetArch {
 struct Config {
     os: TargetOS,
     arch: TargetArch,
-    no_intl: bool,
+    full_icu: bool,
 }
 
 impl Config {
@@ -36,12 +36,12 @@ impl Config {
             NODE_VERSION,
             self.os.to_string(),
             self.arch.to_string(),
-            if self.no_intl { "-nointl" } else { "" }
+            if self.full_icu { "" } else { "-small_icu" }
         )
     }
     fn url(&self) -> String {
         format!(
-            "https://github.com/patr0nus/libnode/releases/download/{}/{}",
+            "https://github.com/patr0nus/rust-nodejs/releases/download/libnode-{}/{}",
             NODE_VERSION,
             self.zip_name()
         )
@@ -64,7 +64,7 @@ fn get_lib_name(path: &Path, os: Option<TargetOS>) -> Option<&str> {
 }
 
 fn sha256_digest(mut reader: impl io::Read) -> io::Result<Digest> {
-    use ring::digest::{Context, Digest, SHA256};
+    use ring::digest::{Context, SHA256};
 
     let mut context = Context::new(&SHA256);
     let mut buffer = [0; 8 * 1024];
@@ -81,21 +81,22 @@ fn sha256_digest(mut reader: impl io::Read) -> io::Result<Digest> {
 }
 
 
-fn verify_sha256_of_file(path: &Path, expected_hex: &str) {
-    let mut file = File::open(path).unwrap();
-    let sha256 = sha256_digest(file).unwrap();
+fn verify_sha256_of_file(path: &Path, expected_hex: &str) -> anyhow::Result<()>{
+    let mut file = File::open(path)?;
+    let sha256 = sha256_digest(file)?;
     let actual_hex = hex::encode(sha256.as_ref());
-    assert_eq!(
+    anyhow::ensure!(
         actual_hex == expected_hex,
         "{:?}: sha256 does not match (actual: {}, expected: {})",
         path,
         actual_hex,
         expected_hex
     );
+    Ok(())
 }
 
 fn get_sha256_for_filename(filename: &str) -> Option<&'static str> {
-    for line in include_str!("../nodejs/checksums").split('\n') {
+    for line in include_str!("checksums").split('\n') {
         let mut line_component_iter = line.trim().split(' ');
         let sha256 = line_component_iter.next()?.trim();
         let fname = line_component_iter.next()?.strip_prefix('*')?;
@@ -117,6 +118,7 @@ fn main() -> anyhow::Result<()> {
     if env::var_os("DOCS_RS").is_some() {
         return Ok(());
     }
+    let out_dir = PathBuf::from(env::var("OUT_DIR")?);
     let os = match env::var("CARGO_CFG_TARGET_OS")?.as_str() {
         "macos" => Ok(TargetOS::Darwin),
         "windows" => Ok(TargetOS::Win32),
@@ -135,10 +137,10 @@ fn main() -> anyhow::Result<()> {
             anyhow::bail!("Unsupported Environment ABI: {}", target_env)
         }
     }
-    println!("cargo:rerun-if-env-changed=LIBNODE_LIB_PATH");
-    let lib_path = if let Ok(lib_path_from_env) = env::var("LIBNODE_LIB_PATH") {
-        println!("cargo:rerun-if-changed={}", lib_path_from_env);
-        lib_path_from_env
+    println!("cargo:rerun-if-env-changed=LIBNODE_PATH");
+    let libnode_path = if let Ok(libnode_path_from_env) = env::var("LIBNODE_PATH") {
+        println!("cargo:rerun-if-changed={}", libnode_path_from_env);
+        PathBuf::from(libnode_path_from_env)
     } else {
         let config = Config {
             os: match os.clone() {
@@ -149,12 +151,11 @@ fn main() -> anyhow::Result<()> {
                 Ok(arch) => arch,
                 Err(other) => anyhow::bail!("Unsupported target arch: {}", other),
             },
-            no_intl: env::var("CARGO_FEATURE_NO_INTL").is_ok(),
+            full_icu: env::var("CARGO_FEATURE_FULL_ICU").is_ok(),
         };
         let sha256 = get_sha256_for_filename(config.zip_name().as_str()).expect(
             &format!("No sha256 checksum found for filename: {}", config.zip_name().as_str())
         );
-        let out_dir = PathBuf::from(env::var("OUT_DIR")?);
         let libnode_zip = out_dir.join(config.zip_name());
 
         if verify_sha256_of_file(libnode_zip.as_path(), sha256).is_err() {
@@ -169,10 +170,14 @@ fn main() -> anyhow::Result<()> {
         let _ = std::fs::remove_dir_all(libnode_extracted.as_path());
         println!("Extracting to {:?}", libnode_extracted);
         zip_extract::extract(File::open(libnode_zip)?, &libnode_extracted, true)?;
-        libnode_extracted.join("lib").to_str().unwrap().to_string()
+        libnode_extracted
     };
 
-    println!("cargo:rustc-link-search=native={}", lib_path);
+    std::fs::copy(libnode_path.join("sys.rs"), out_dir.join("sys.rs"))?;
+
+    let lib_path = libnode_path.join("lib");
+
+    println!("cargo:rustc-link-search=native={}", lib_path.to_str().unwrap());
     for file in std::fs::read_dir(lib_path)? {
         let file = file?;
         if !file.file_type()?.is_file() {
@@ -186,15 +191,14 @@ fn main() -> anyhow::Result<()> {
         println!("cargo:rustc-link-lib=static={}", lib_name);
     }
 
-    let os_specific_libs = match os {
-        Ok(TargetOS::Darwin) => vec!["c++"],
-        Ok(TargetOS::Linux) => vec!["stdc++"],
-        Ok(TargetOS::Win32) => vec!["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"],
-        Err(_) => vec![],
+    let os_libs = match os {
+        Ok(TargetOS::Darwin) => ["c++"].as_ref(),
+        Ok(TargetOS::Linux) => ["stdc++"].as_ref(),
+        Ok(TargetOS::Win32) => ["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"].as_ref(),
+        Err(_) => [].as_ref(),
     };
-    for lib_name in os_specific_libs {
-        println!("cargo:rustc-link-lib={}", lib_name);
+    for os_lib_name in os_libs {
+        println!("cargo:rustc-link-lib={}", *os_lib_name);
     }
-
     Ok(())
 }
