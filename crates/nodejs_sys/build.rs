@@ -1,9 +1,10 @@
-use sha1::{Digest, Sha1};
 use std::env;
 use std::ffi::OsStr;
 use std::fs::File;
+use std::io;
 use std::path::{Path, PathBuf};
 use strum::ToString;
+use ring::digest::Digest;
 
 const NODE_VERSION: &str = "v16.9.1";
 #[derive(Debug, Eq, PartialEq, Copy, Clone, ToString)]
@@ -62,28 +63,44 @@ fn get_lib_name(path: &Path, os: Option<TargetOS>) -> Option<&str> {
     }
 }
 
-fn verify_sha1_of_file(path: &Path, expected_hex: &str) -> anyhow::Result<()> {
-    let mut file = File::open(path)?;
-    let mut sha1 = Sha1::default();
-    std::io::copy(&mut file, &mut sha1)?;
-    let actual_hex = hex::encode(sha1.finalize().as_slice());
-    anyhow::ensure!(
+fn sha256_digest(mut reader: impl io::Read) -> io::Result<Digest> {
+    use ring::digest::{Context, Digest, SHA256};
+
+    let mut context = Context::new(&SHA256);
+    let mut buffer = [0; 8 * 1024];
+
+    loop {
+        let count = reader.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        context.update(&buffer[..count]);
+    }
+
+    Ok(context.finish())
+}
+
+
+fn verify_sha256_of_file(path: &Path, expected_hex: &str) {
+    let mut file = File::open(path).unwrap();
+    let sha256 = sha256_digest(file).unwrap();
+    let actual_hex = hex::encode(sha256.as_ref());
+    assert_eq!(
         actual_hex == expected_hex,
-        "{:?}: sha1 does not match (actual: {}, expected: {})",
+        "{:?}: sha256 does not match (actual: {}, expected: {})",
         path,
         actual_hex,
         expected_hex
     );
-    Ok(())
 }
 
-fn get_sha1_of_filename(filename: &str) -> Option<&'static str> {
-    for line in include_str!("checksums.sha1").split('\n') {
+fn get_sha256_for_filename(filename: &str) -> Option<&'static str> {
+    for line in include_str!("../nodejs/checksums").split('\n') {
         let mut line_component_iter = line.trim().split(' ');
-        let sha1 = line_component_iter.next()?.trim();
+        let sha256 = line_component_iter.next()?.trim();
         let fname = line_component_iter.next()?.strip_prefix('*')?;
         if fname == filename {
-            return Some(sha1);
+            return Some(sha256);
         }
     }
     None
@@ -134,20 +151,18 @@ fn main() -> anyhow::Result<()> {
             },
             no_intl: env::var("CARGO_FEATURE_NO_INTL").is_ok(),
         };
-        let sha1 = if let Some(sha1) = get_sha1_of_filename(config.zip_name().as_str()) {
-            sha1
-        } else {
-            anyhow::bail!("Unsupported config: {:?}", config)
-        };
+        let sha256 = get_sha256_for_filename(config.zip_name().as_str()).expect(
+            &format!("No sha256 checksum found for filename: {}", config.zip_name().as_str())
+        );
         let out_dir = PathBuf::from(env::var("OUT_DIR")?);
         let libnode_zip = out_dir.join(config.zip_name());
 
-        if verify_sha1_of_file(libnode_zip.as_path(), sha1).is_err() {
+        if verify_sha256_of_file(libnode_zip.as_path(), sha256).is_err() {
             let url = config.url();
             println!("Downloading {}", url);
             download(url.as_str(), libnode_zip.as_path())?;
             println!("Verifying {:?}", libnode_zip.as_path());
-            verify_sha1_of_file(libnode_zip.as_path(), sha1)?;
+            verify_sha256_of_file(libnode_zip.as_path(), sha256)?;
         }
 
         let libnode_extracted = out_dir.join("libnode_extracted");

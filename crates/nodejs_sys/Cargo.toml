@@ -1,0 +1,18 @@
+[package]
+name = "nodejs_sys"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+ring = "0.16"
+hex = "0.4"
+zip-extract = "0.1"
+once_cell = "1"
+strum = { version = "0.20", features = [ "derive" ] }
+
+[build-dependencies.attohttpc]
+version = "0.18"
+default-features = false # No need for the compress feature
+features = [ "rustls" ]
