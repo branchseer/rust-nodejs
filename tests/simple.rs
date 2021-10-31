@@ -3,7 +3,7 @@ use nodejs::neon::{context::Context, types::JsNumber};
 #[chazi::test(check_reach)]
 fn test_simple() {
     let mut answer = 0;
-    unsafe {
+    let exit_code = unsafe {
         nodejs::run(|mut cx| {
             let script = cx.string("40+2");
             let forty_two = neon::reflect::eval(&mut cx, script)?;
@@ -11,9 +11,10 @@ fn test_simple() {
                 .downcast_or_throw::<JsNumber, _>(&mut cx)?
                 .value(&mut cx) as _;
             Ok(())
-        });
-    }
+        })
+    };
     assert_eq!(answer, 42);
+    assert_eq!(exit_code, 0);
     chazi::reached::last()
 }
 
