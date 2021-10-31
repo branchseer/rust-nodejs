@@ -1,10 +1,10 @@
+use ring::digest::Digest;
 use std::env;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io;
 use std::path::{Path, PathBuf};
 use strum::ToString;
-use ring::digest::Digest;
 
 const NODE_VERSION: &str = "v16.9.1";
 #[derive(Debug, Eq, PartialEq, Copy, Clone, ToString)]
@@ -80,9 +80,8 @@ fn sha256_digest(mut reader: impl io::Read) -> io::Result<Digest> {
     Ok(context.finish())
 }
 
-
-fn verify_sha256_of_file(path: &Path, expected_hex: &str) -> anyhow::Result<()>{
-    let mut file = File::open(path)?;
+fn verify_sha256_of_file(path: &Path, expected_hex: &str) -> anyhow::Result<()> {
+    let file = File::open(path)?;
     let sha256 = sha256_digest(file)?;
     let actual_hex = hex::encode(sha256.as_ref());
     anyhow::ensure!(
@@ -153,9 +152,10 @@ fn main() -> anyhow::Result<()> {
             },
             full_icu: env::var("CARGO_FEATURE_FULL_ICU").is_ok(),
         };
-        let sha256 = get_sha256_for_filename(config.zip_name().as_str()).expect(
-            &format!("No sha256 checksum found for filename: {}", config.zip_name().as_str())
-        );
+        let sha256 = get_sha256_for_filename(config.zip_name().as_str()).expect(&format!(
+            "No sha256 checksum found for filename: {}",
+            config.zip_name().as_str()
+        ));
         let libnode_zip = out_dir.join(config.zip_name());
 
         if verify_sha256_of_file(libnode_zip.as_path(), sha256).is_err() {
@@ -177,7 +177,10 @@ fn main() -> anyhow::Result<()> {
 
     let lib_path = libnode_path.join("lib");
 
-    println!("cargo:rustc-link-search=native={}", lib_path.to_str().unwrap());
+    println!(
+        "cargo:rustc-link-search=native={}",
+        lib_path.to_str().unwrap()
+    );
     for file in std::fs::read_dir(lib_path)? {
         let file = file?;
         if !file.file_type()?.is_file() {
@@ -194,7 +197,9 @@ fn main() -> anyhow::Result<()> {
     let os_libs = match os {
         Ok(TargetOS::Darwin) => ["c++"].as_ref(),
         Ok(TargetOS::Linux) => ["stdc++"].as_ref(),
-        Ok(TargetOS::Win32) => ["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"].as_ref(),
+        Ok(TargetOS::Win32) => {
+            ["dbghelp", "winmm", "iphlpapi", "psapi", "crypt32", "user32"].as_ref()
+        }
         Err(_) => [].as_ref(),
     };
     for os_lib_name in os_libs {

@@ -10,9 +10,6 @@ os.chdir('node-{}'.format(config.nodeVersion))
 
 configureArgvs = ['--enable-static'] + config.configFlags
 
-if sys.platform == 'darwin':
-    os.environ["MACOSX_DEPLOYMENT_TARGET"] = "10.13"
-
 if sys.platform == 'win32':
     os.environ["config_flags"] = ' '.join(configureArgvs)
     subprocess.check_call(

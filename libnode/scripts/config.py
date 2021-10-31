@@ -24,6 +24,9 @@ supported_triples = [
 	"aarch64-unknown-linux-gnu",
 ]
 
+if sys.platform == 'darwin':
+	os.environ["MACOSX_DEPLOYMENT_TARGET"] = "10.13"
+
 nodeVersion = os.environ['LIBNODE_NODE_VERSION']
 configFlags = (os.environ.get('LIBNODE_CONFIG_FLAGS') or '').split()
 
