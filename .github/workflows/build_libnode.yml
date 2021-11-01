@@ -38,10 +38,49 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Build
+      - name: Install nasm on Windows
+        run: choco install -y nasm
+        if: runner.os == 'Windows'
+
+      - name: Install rust target
+        shell: bash
+        run: rustup target add `python -m scripts.config`
+
+      - name: Install LLVM on Windows
         run: |
-          mkdir libnode
-          echo "hello" > libnode/a_file
+          C:\\msys64\\usr\\bin\\bash.exe -lc "pacman --noconfirm -R mingw-w64-x86_64-clang-tools-extra mingw-w64-x86_64-clang"
+          choco install -y llvm
+        if: runner.os == 'Windows'
+
+      - name: Install GNU patch on Windows
+        run: choco install -y patch
+        if: runner.os == 'Windows'
+
+      - name: Install rust-bindgen
+        run: cargo install bindgen
+
+      - name: Download source code of Node.js
+        run: python -m scripts.download
+
+      - name: Patch source code of Node.js
+        run: python -m scripts.patch
+
+      - name: Build
+        shell: bash
+        run: |
+          if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            export CC=gcc-9
+            export CXX=g++-9
+          fi
+          python -m scripts.build
+
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Postprocess
+        run: python -m scripts.postproc
+
+      - name: Cleanup
+        shell: bash
+        run: rm -rf node-*
 
       - name: Archive
         run: |
@@ -55,6 +94,10 @@ jobs:
         with:
           name: ${{ steps.archive.outputs.zipname }}
           path: libnode/${{ steps.archive.outputs.zipname }}
+
+      - name: Test
+        run: python -m scripts.test
+
   gh_release:
     needs: build
     runs-on: ubuntu-latest
