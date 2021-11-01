@@ -24,7 +24,7 @@ fn test_require_builtin() {
     chazi::reached::last()
 }
 
-#[chazi::test(check_reach)]
+#[chazi::test(check_reach, timeout_ms = 30000)]
 fn test_require_external_napi() {
     let test_tmpdir = env!("CARGO_TARGET_TMPDIR");
     let napi_module_src_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
