@@ -62,10 +62,11 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          path: runner.temp
+          path: ${{ runner.temp }}
       - name: Compute checksums
-        working-directory: runner.temp
+        working-directory: ${{ runner.temp }}
         run: |
+          mv ./*/*.zip .
           pwd
           ls
           which sha256sum
