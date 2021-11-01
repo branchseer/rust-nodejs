@@ -18,6 +18,6 @@ libnode_path = os.path.realpath(os.path.join(
 os.environ["LIBNODE_PATH"] = libnode_path
 
 subprocess.check_call(
-    ["cargo", "test", "--target", config.target_triple, "-vvvv", "--release"],
+    ["cargo", "test", "--target", config.target_triple, "-vv", "--release", "--", "--nocapture"],
     cwd=crate_path,
 )
