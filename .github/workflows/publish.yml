@@ -3,7 +3,7 @@ name: Publish
 on:
   workflow_dispatch:
     inputs:
-      bumpLevel:
+      bumplevel:
         description: cargo-release bump level
         required: true
         default: 'release'
@@ -13,13 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: beta
-        default: true
-        profile: minimal
     - run: |
         git config --global user.email "dk4rest@gmail.com"
         git config --global user.name "patr0nus"
-        cargo install --version=~0.17 cargo-release
-        cargo release -v ${INPUT_BUMPLEVEL} --execute --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        cargo install --version=~0.18 cargo-release
+        echo cargo release -v ${{ github.event.inputs.bumplevel }} --execute --no-confirm
+        cargo release -v ${{ github.event.inputs.bumplevel }} --execute --no-confirm --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

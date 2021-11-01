@@ -10,6 +10,10 @@ use std::os::raw::{c_char, c_int};
 use std::ptr::null_mut;
 use std::sync::Once;
 
+/// Starts a Node.js instance and immediately run the provided N-API module init function.
+/// Blocks until the event loop stops, and returns the exit code.
+/// # Safety
+/// This function can only be called at most once.
 pub unsafe fn run<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) -> i32 {
     static mut MODULE_INIT_FN: *mut std::ffi::c_void = null_mut(); // *mut Option<F>
 
