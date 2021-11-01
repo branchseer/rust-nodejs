@@ -1,16 +1,16 @@
 name: Clippy Check
 
-#on:
-#  push:
-#    branches: [ master ]
-#    paths-ignore:
-#      - '**/README.md'
-#      - 'libnode/**'
-#  pull_request:
-#    branches: [ master ]
-#    paths-ignore:
-#      - '**/README.md'
-#      - 'libnode/**'
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+      - 'libnode/**'
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
+      - 'libnode/**'
 
 env:
   CARGO_TERM_COLOR: always
