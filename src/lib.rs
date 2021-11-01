@@ -8,6 +8,7 @@ use neon::result::NeonResult;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int};
 use std::ptr::null_mut;
+use std::sync::Once;
 
 pub unsafe fn run<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) -> i32 {
     static mut MODULE_INIT_FN: *mut std::ffi::c_void = null_mut(); // *mut Option<F>
@@ -20,15 +21,22 @@ pub unsafe fn run<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) 
         m: neon::macro_internal::runtime::raw::Local,
     ) -> neon::macro_internal::runtime::raw::Local {
         neon::macro_internal::initialize_module(env, std::mem::transmute(m), |ctx| {
-            let module_init_fn = (MODULE_INIT_FN as *mut Option<F>).as_mut().unwrap();
-            let module_init_fn = module_init_fn.take().unwrap();
-            MODULE_INIT_FN = null_mut();
-            module_init_fn(ctx)
+            static ONCE: Once = Once::new();
+            let mut result = NeonResult::Ok(());
+            ONCE.call_once(|| {
+                let module_init_fn = (MODULE_INIT_FN as *mut Option<F>).as_mut().unwrap();
+                let module_init_fn = module_init_fn.take().unwrap();
+                MODULE_INIT_FN = null_mut();
+                result = module_init_fn(ctx)
+            });
+            result
         });
         m
     }
 
-    let args: Vec<String> = std::env::args().collect();
+    let args: Vec<CString> = std::env::args()
+        .map(|arg| CString::new(arg).unwrap_or_default())
+        .collect();
     let mut argc_c = Vec::<*const c_char>::with_capacity(args.len());
     for arg in &args {
         argc_c.push(arg.as_ptr() as *const c_char)
