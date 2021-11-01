@@ -64,6 +64,9 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Compute checksums
         run: |
+          pwd
+          ls
+          which sha256sum
           echo '## SHA256 Checksums' > ../release_notes.md
           echo '```' >> ../release_notes.md
           sha256sum --binary *.zip >> ../release_notes.md
