@@ -58,3 +58,16 @@ fn test_argv() {
     assert_eq!(exit_code, 0);
     chazi::reached::last()
 }
+
+#[chazi::test(check_reach)]
+fn test_uncaught_error() {
+    let exit_code = unsafe {
+        nodejs::run(|mut cx| {
+            let script = cx.string("setImmediate(() => throw new Error())");
+            neon::reflect::eval(&mut cx, script)?;
+            Ok(())
+        })
+    };
+    assert_eq!(exit_code, 1);
+    chazi::reached::last()
+}
