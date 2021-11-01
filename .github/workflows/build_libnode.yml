@@ -10,10 +10,6 @@ on:
 env:
   LIBNODE_NODE_VERSION: ${{ github.event.inputs.nodeVersion }}
 
-defaults:
-  run:
-    working-directory: libnode
-
 jobs:
   build:
     strategy:
@@ -31,6 +27,9 @@ jobs:
     env:
       LIBNODE_ARCH: ${{ matrix.arch }}
       LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
+    defaults:
+      run:
+        working-directory: libnode
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -60,10 +59,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: Download artifacts
         uses: actions/download-artifact@v2
+        with:
+          path: runner.temp
       - name: Compute checksums
+        working-directory: runner.temp
         run: |
           pwd
           ls
@@ -80,10 +81,10 @@ jobs:
         with:
           tag_name: "libnode-${{ env.LIBNODE_NODE_VERSION }}"
           release_name: "libnode-${{ env.LIBNODE_NODE_VERSION }}"
-          body_path: release_notes.md
+          body_path: ${{ runner.temp }}/release_notes.md
       - name: Upload release assets
         uses: csexton/release-asset-action@v2
         with:
-          pattern: "*.zip"
+          pattern: ${{ runner.temp }}/*.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
           release-url: ${{ steps.create_release.outputs.upload_url }}
