@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.archive.outputs.zipname }}
-          path: ${{ steps.archive.outputs.zipname }}
+          path: libnode/${{ steps.archive.outputs.zipname }}
 
       - name: Test
         run: python -m scripts.test
