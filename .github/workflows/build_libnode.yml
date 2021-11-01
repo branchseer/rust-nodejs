@@ -75,6 +75,10 @@ jobs:
       - name: Postprocess
         run: python -m scripts.postproc
 
+      - name: Cleanup
+        shell: bash
+        run: rm -rf node-*
+
       - name: Archive
         run: |
           zipname=$(python -m scripts.archive)
