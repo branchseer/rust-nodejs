@@ -60,6 +60,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts
         uses: actions/download-artifact@v2
       - name: Compute checksums
@@ -67,10 +68,10 @@ jobs:
           pwd
           ls
           which sha256sum
-          echo '## SHA256 Checksums' > ../release_notes.md
-          echo '```' >> ../release_notes.md
-          sha256sum --binary *.zip >> ../release_notes.md
-          echo '```' >> ../release_notes.md
+          echo '## SHA256 Checksums' > release_notes.md
+          echo '```' >> release_notes.md
+          sha256sum --binary *.zip >> release_notes.md
+          echo '```' >> release_notes.md
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
