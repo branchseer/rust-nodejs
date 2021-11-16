@@ -21,7 +21,7 @@ fn test_simple() {
 }
 
 #[chazi::test(check_reach)]
-fn test_process_exit() {
+fn test_process_exit_nonzero() {
     let exit_code = unsafe {
         nodejs::run(|mut cx| {
             let script = cx.string("process.exit(40+2)");
@@ -30,6 +30,19 @@ fn test_process_exit() {
         })
     };
     assert_eq!(exit_code, 42);
+    chazi::reached::last()
+}
+
+#[chazi::test(check_reach)]
+fn test_process_exit() {
+    let exit_code = unsafe {
+        nodejs::run(|mut cx| {
+            let script = cx.string("process.exit()");
+            neon::reflect::eval(&mut cx, script)?;
+            Ok(())
+        })
+    };
+    assert_eq!(exit_code, 0);
     chazi::reached::last()
 }
 
