@@ -93,7 +93,7 @@ namespace {
                 result.exit_code = 1;
             }
             else {
-                int evtloop_ret = node::SpinEventLoop(env).FromMaybe(1);
+                int evtloop_ret = node::SpinEventLoop(env).FromMaybe(0);
                 if (result.exit_code == 0) {
                     result.exit_code = evtloop_ret;
                 }
