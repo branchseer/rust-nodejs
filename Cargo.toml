@@ -16,9 +16,20 @@ doctest = false # Doc-tests would fail because it doesn't read rustflags in .con
 [features]
 full-icu = []
 
+
+[[test]]
+name = "require"
+path = "tests/require.rs"
+required-features = ["neon"]
+
+[[test]]
+name = "simple"
+path = "tests/simple.rs"
+required-features = ["neon"]
+
 [dependencies]
 once_cell = "1"
-neon = { version = "0.9.0", default-features = false, features = [ "napi-6", "channel-api" ] }
+neon = { optional = true, version = "0.9.0", default-features = false, features = [ "napi-6", "channel-api" ] }
 libc = "0.2"
 
 [dev-dependencies]

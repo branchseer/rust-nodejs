@@ -2,14 +2,15 @@
 
 mod sys;
 
+#[cfg(feature = "neon")]
 pub use neon;
-
+#[cfg(feature = "neon")]
 use neon::context::ModuleContext;
+#[cfg(feature = "neon")]
 use neon::result::NeonResult;
+
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int};
-use std::ptr::null_mut;
-use std::sync::Once;
 
 pub unsafe fn run_raw(napi_reg_func: *mut ::std::os::raw::c_void) -> i32 {
     let args: Vec<CString> = std::env::args()
@@ -38,7 +39,10 @@ pub unsafe fn run_raw(napi_reg_func: *mut ::std::os::raw::c_void) -> i32 {
 /// Blocks until the event loop stops, and returns the exit code.
 /// # Safety
 /// This function can only be called at most once.
+#[cfg(feature = "neon")]
 pub unsafe fn run_neon<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) -> i32 {
+    use std::ptr::null_mut;
+    use std::sync::Once;
     static mut MODULE_INIT_FN: *mut std::ffi::c_void = null_mut(); // *mut Option<F>
 
     let mut module_init_fn = Some(f);

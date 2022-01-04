@@ -51,4 +51,4 @@ jobs:
       shell: bash
       run: |
         rustup target add $RS_NODEJS_CARGO_TARGET
-        cargo test --verbose --release --target $RS_NODEJS_CARGO_TARGET --features "$RS_NODEJS_CARGO_FEATURES"
+        cargo test --verbose --release --target $RS_NODEJS_CARGO_TARGET --features "neon $RS_NODEJS_CARGO_FEATURES"
