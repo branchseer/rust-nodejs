@@ -12,7 +12,7 @@ fn test_require_builtin() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("require('http').STATUS_CODES[418]");
-            let status_text = neon::reflect::eval(&mut cx, script)?;
+            let status_text = eval(&mut cx, script)?;
             script_result = status_text
                 .downcast_or_throw::<JsString, _>(&mut cx)?
                 .value(&mut cx);

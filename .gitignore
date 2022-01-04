@@ -1,5 +1,6 @@
 .idea
 /target
-Cargo.lock
+/nodejs/Cargo.lock
+/tests/Cargo.lock
 .DS_Store
 node_modules

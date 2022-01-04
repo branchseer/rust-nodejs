@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: |
+    - name: cargo release
+      working-directory: nodejs
+      run: |
         git config --global user.email "dk4rest@gmail.com"
         git config --global user.name "patr0nus"
         cargo install --version=~0.18 cargo-release

@@ -1,6 +1,6 @@
 use nodejs::neon::result::NeonResult;
 use nodejs::neon::types::{JsArray, JsString};
-use nodejs::neon::{context::Context, types::JsNumber};
+use nodejs::neon::{context::Context, reflect::eval, types::JsNumber};
 
 #[chazi::test(check_reach)]
 fn test_simple() {
@@ -8,7 +8,7 @@ fn test_simple() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("40+2");
-            let forty_two = neon::reflect::eval(&mut cx, script)?;
+            let forty_two = eval(&mut cx, script)?;
             answer = forty_two
                 .downcast_or_throw::<JsNumber, _>(&mut cx)?
                 .value(&mut cx) as _;
@@ -25,7 +25,7 @@ fn test_process_exit_nonzero() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("process.exit(40+2)");
-            neon::reflect::eval(&mut cx, script)?;
+            eval(&mut cx, script)?;
             Ok(())
         })
     };
@@ -38,7 +38,7 @@ fn test_process_exit() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("process.exit()");
-            neon::reflect::eval(&mut cx, script)?;
+            eval(&mut cx, script)?;
             Ok(())
         })
     };
@@ -52,7 +52,7 @@ fn test_argv() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("[process.argv0, ...process.argv.slice(1)]");
-            let process_args = neon::reflect::eval(&mut cx, script)?;
+            let process_args = eval(&mut cx, script)?;
             let process_args = process_args
                 .downcast_or_throw::<JsArray, _>(&mut cx)?
                 .to_vec(&mut cx)?;
@@ -77,7 +77,7 @@ fn test_uncaught_error() {
     let exit_code = unsafe {
         nodejs::run_neon(|mut cx| {
             let script = cx.string("setImmediate(() => throw new Error())");
-            neon::reflect::eval(&mut cx, script)?;
+            eval(&mut cx, script)?;
             Ok(())
         })
     };
