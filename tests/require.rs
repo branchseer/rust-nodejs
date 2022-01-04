@@ -10,7 +10,7 @@ use std::path::PathBuf;
 fn test_require_builtin() {
     let mut script_result = String::new();
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("require('http').STATUS_CODES[418]");
             let status_text = neon::reflect::eval(&mut cx, script)?;
             script_result = status_text
@@ -65,7 +65,7 @@ fn test_require_external_napi() {
 
     let mut add_result = 0;
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let module_path = cx.string(napi_module_installed_dir);
             let js_fn_script = cx.string(
                 "module_path => { \

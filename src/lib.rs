@@ -3,6 +3,7 @@
 mod sys;
 
 pub use neon;
+
 use neon::context::ModuleContext;
 use neon::result::NeonResult;
 use std::ffi::{CStr, CString};
@@ -10,11 +11,34 @@ use std::os::raw::{c_char, c_int};
 use std::ptr::null_mut;
 use std::sync::Once;
 
+pub unsafe fn run_raw(napi_reg_func: *mut ::std::os::raw::c_void) -> i32 {
+    let args: Vec<CString> = std::env::args()
+        .map(|arg| CString::new(arg).unwrap_or_default())
+        .collect();
+    let mut argc_c = Vec::<*const c_char>::with_capacity(args.len());
+    for arg in &args {
+        argc_c.push(arg.as_ptr() as *const c_char)
+    }
+
+    let result = sys::node_run(sys::node_options_t {
+        process_argc: argc_c.len() as c_int,
+        process_argv: argc_c.as_ptr(),
+        napi_reg_func,
+    });
+
+    if !result.error.is_null() {
+        let result_error_string = CString::from(CStr::from_ptr(result.error));
+        libc::free(result.error as _);
+        panic!("Node.js failed to start: {:?}", result_error_string);
+    }
+    result.exit_code as i32
+}
+
 /// Starts a Node.js instance and immediately run the provided N-API module init function.
 /// Blocks until the event loop stops, and returns the exit code.
 /// # Safety
 /// This function can only be called at most once.
-pub unsafe fn run<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) -> i32 {
+pub unsafe fn run_neon<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) -> i32 {
     static mut MODULE_INIT_FN: *mut std::ffi::c_void = null_mut(); // *mut Option<F>
 
     let mut module_init_fn = Some(f);
@@ -38,24 +62,5 @@ pub unsafe fn run<F: for<'a> FnOnce(ModuleContext<'a>) -> NeonResult<()>>(f: F) 
         m
     }
 
-    let args: Vec<CString> = std::env::args()
-        .map(|arg| CString::new(arg).unwrap_or_default())
-        .collect();
-    let mut argc_c = Vec::<*const c_char>::with_capacity(args.len());
-    for arg in &args {
-        argc_c.push(arg.as_ptr() as *const c_char)
-    }
-
-    let result = sys::node_run(sys::node_options_t {
-        process_argc: argc_c.len() as c_int,
-        process_argv: argc_c.as_ptr(),
-        napi_reg_func: napi_reg_func::<F> as _,
-    });
-
-    if !result.error.is_null() {
-        let result_error_string = CString::from(CStr::from_ptr(result.error));
-        libc::free(result.error as _);
-        panic!("Node.js failed to start: {:?}", result_error_string);
-    }
-    result.exit_code as i32
+    run_raw(napi_reg_func::<F> as _)
 }

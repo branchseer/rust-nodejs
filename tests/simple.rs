@@ -6,7 +6,7 @@ use nodejs::neon::{context::Context, types::JsNumber};
 fn test_simple() {
     let mut answer = 0;
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("40+2");
             let forty_two = neon::reflect::eval(&mut cx, script)?;
             answer = forty_two
@@ -23,7 +23,7 @@ fn test_simple() {
 #[chazi::test(check_reach)]
 fn test_process_exit_nonzero() {
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("process.exit(40+2)");
             neon::reflect::eval(&mut cx, script)?;
             Ok(())
@@ -36,7 +36,7 @@ fn test_process_exit_nonzero() {
 #[chazi::test(check_reach)]
 fn test_process_exit() {
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("process.exit()");
             neon::reflect::eval(&mut cx, script)?;
             Ok(())
@@ -50,7 +50,7 @@ fn test_process_exit() {
 fn test_argv() {
     let mut args = Vec::<String>::new();
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("[process.argv0, ...process.argv.slice(1)]");
             let process_args = neon::reflect::eval(&mut cx, script)?;
             let process_args = process_args
@@ -75,7 +75,7 @@ fn test_argv() {
 #[chazi::test(check_reach)]
 fn test_uncaught_error() {
     let exit_code = unsafe {
-        nodejs::run(|mut cx| {
+        nodejs::run_neon(|mut cx| {
             let script = cx.string("setImmediate(() => throw new Error())");
             neon::reflect::eval(&mut cx, script)?;
             Ok(())
