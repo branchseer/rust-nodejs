@@ -1,3 +1,7 @@
+use std::ptr::null_mut;
+
 fn main() {
-    println!("Hello, world!");
+    unsafe {
+        nodejs::run_raw(null_mut());
+    }
 }
