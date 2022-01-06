@@ -45,7 +45,7 @@ elif sys.platform == 'darwin':
             print('Copying', libFile.name)
             shutil.copy(libFile.path, libFolder)
             print('Striping', libFile.name)
-            # subprocess.check_call(['strip', '-x', os.path.join(libFolder, libFile.name)])
+            subprocess.check_call(['strip', '-x', os.path.join(libFolder, libFile.name)])
 elif sys.platform == 'linux':
     for dirname, _, basenames in os.walk(nodeSrcFolder + '/out/Release/obj.target'):
         for basename in basenames:
@@ -62,7 +62,7 @@ additional_obj_glob = nodeSrcFolder + '/out/Release/obj.target/node/gen/*.o'
 if sys.platform == 'win32':
     additional_obj_glob = nodeSrcFolder + '/out/Release/obj/node_mksnapshot/src/*.obj'
 elif sys.platform == 'darwin' and config.arch == 'arm64':
-    additional_obj_glob = nodeSrcFolder + '/out/Release/obj/node_mksnapshot/src/*.o'
+    additional_obj_glob = nodeSrcFolder + '/out/Release/obj.target/node/src/node_*_stub.o'
 
 if sys.platform == 'win32':
     subprocess.check_call([
