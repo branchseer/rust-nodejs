@@ -1,6 +1,6 @@
 import os
 import subprocess
-import sys
+import platform
 
 from . import config
 
@@ -20,7 +20,7 @@ os.environ["LIBNODE_PATH"] = libnode_path
 
 test_command = ["cargo", "test", "--target", config.target_triple, "-vv", "--release"]
 
-if sys.platform == 'darwin' and config.arch == 'arm64':
+if config.arch == 'arm64' and platform.processor() != 'arm':
     test_command += [ "--no-run" ]
 else:
     test_command += [ "--", "--nocapture" ]
