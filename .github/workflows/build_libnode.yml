@@ -42,10 +42,6 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Switch to Xcode 12.4
-        run: sudo xcode-select -s /Applications/Xcode_12.4.app/Contents/Developer
-        if: runner.os == 'macOS'
-
       - name: Install nasm on Windows
         run: choco install -y nasm
         if: runner.os == 'Windows'
