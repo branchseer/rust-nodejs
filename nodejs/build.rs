@@ -6,7 +6,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use strum::ToString;
 
-const NODE_VERSION: &str = "v17.1.0";
+const NODE_VERSION: &str = "v17.3.1";
 #[derive(Debug, Eq, PartialEq, Copy, Clone, ToString)]
 #[strum(serialize_all = "camelCase")]
 enum TargetOS {
