@@ -20,6 +20,7 @@ enum TargetOS {
 enum TargetArch {
     X64,
     X86,
+    Arm64,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -127,6 +128,7 @@ fn main() -> anyhow::Result<()> {
     let arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "x86" => Ok(TargetArch::X86),
         "x86_64" => Ok(TargetArch::X64),
+        "aarch64" => Ok(TargetArch::Arm64),
         other => Err(other.to_string()),
     };
     if let Ok(TargetOS::Win32) = os {
