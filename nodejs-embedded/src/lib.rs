@@ -32,7 +32,7 @@ pub unsafe fn main() -> i32 {
         exec_dir.clone()
     };
 
-    let embedder_path_file = res_path.join("node_embedder");
+    let embedder_path_file = res_path.join("nodejs_embedder");
     let dylib_path = std::fs::read_to_string(embedder_path_file).unwrap();
     let dylib_path = Path::new(dylib_path.trim()).absolutize_from(&exec_dir).unwrap();
 

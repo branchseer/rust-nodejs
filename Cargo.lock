@@ -325,7 +325,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nodejs-bin"
+name = "nodejs-embedded"
 version = "0.1.0"
 dependencies = [
  "libloading 0.7.2",

@@ -2,7 +2,7 @@
 members = [
     "nodejs",
     "nodejs-tests",
-    "nodejs-bin",
+    "nodejs-embedded",
 ]
 
 [profile.release]
