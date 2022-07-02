@@ -1,7 +1,9 @@
 [workspace]
-
 members = [
     "nodejs",
     "nodejs-tests",
     "nodejs-bin",
 ]
+
+[profile.release]
+strip = "debuginfo" # In order to preserve napi functions, we shouldn't strip symbols

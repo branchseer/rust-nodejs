@@ -18,9 +18,8 @@ full-icu = []
 
 [dependencies]
 once_cell = "1"
-neon = { optional = true, version = "0.9.0", default-features = false, features = [ "napi-6", "channel-api" ] }
+neon = { optional = true, version = "0.10.1", default-features = false, features = [ "napi-latest" ] }
 libc = "0.2"
-
 
 [build-dependencies]
 ring = "0.16"
@@ -30,6 +29,6 @@ strum = { version = "0.20", features = [ "derive" ] }
 anyhow = "1"
 
 [build-dependencies.attohttpc]
-version = "0.18"
+version = "0.19.1"
 default-features = false # No need for the compress feature
 features = [ "rustls" ]

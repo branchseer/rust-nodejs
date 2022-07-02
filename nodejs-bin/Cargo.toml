@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 nodejs = { path = "../nodejs" }
 libloading = "0.7"
+path-absolutize = "3.0.13"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc = "0.2"
