@@ -76,7 +76,7 @@ fn test_require_external_napi() {
             let js_fn = eval(&mut cx, js_fn_script)?;
             let js_fn = js_fn.downcast_or_throw::<JsFunction, _>(&mut cx)?;
             let js_undefined = cx.undefined();
-            let js_fn_result = js_fn.call(&mut cx, js_undefined, vec![module_path])?;
+            let js_fn_result = js_fn.call(&mut cx, js_undefined, [module_path.upcast()])?;
             let js_fn_result = js_fn_result.downcast_or_throw::<JsNumber, _>(&mut cx)?;
             add_result = js_fn_result.value(&mut cx) as _;
             Ok(())
