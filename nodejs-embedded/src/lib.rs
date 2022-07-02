@@ -26,11 +26,11 @@ unsafe extern "C" fn node_start(napi_reg_func: *mut c_void) -> i32 {
 
 pub unsafe fn main() -> i32 {
     let exec_dir =  std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
-    let res_path = if cfg!(target_os = "macos") {
-        macos_res_path()
-    } else {
-        exec_dir.clone()
-    };
+
+    #[cfg(target_os = "macos")]
+    let res_path = macos_res_path();
+    #[cfg(not(target_os = "macos"))]
+    let res_path = exec_dir.clone();
 
     let embedder_path_file = res_path.join("nodejs_embedder");
     let dylib_path = std::fs::read_to_string(embedder_path_file).unwrap();

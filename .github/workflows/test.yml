@@ -6,13 +6,11 @@ on:
     paths-ignore:
       - '**/README.md'
       - 'libnode/**'
-      - 'nodejs-embedded/**'
   pull_request:
     branches: [ master ]
     paths-ignore:
       - '**/README.md'
       - 'libnode/**'
-      - 'nodejs-embedded/**'
 env:
   CARGO_TERM_COLOR: always
 
