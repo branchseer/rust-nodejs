@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use path_absolutize::Absolutize;
 
 #[cfg(target_os = "macos")]
-fn macos_res_path() -> PathBuf {
+fn platform_res_path() -> Option<PathBuf> {
     use objc::{runtime::Object, *};
     use std::ffi::CStr;
     use std::os::unix::ffi::OsStringExt;
@@ -17,8 +17,14 @@ fn macos_res_path() -> PathBuf {
         CStr::from_ptr(resource_path).to_bytes().to_vec()
     });
     let resource_path = PathBuf::from(OsString::from_vec(resource_path));
-    resource_path
+    Some(resource_path)
 }
+
+#[cfg(not(target_os = "macos"))]
+fn platform_res_path() -> Option<PathBuf> {
+    None
+}
+
 
 unsafe extern "C" fn node_start(napi_reg_func: *mut c_void) -> i32 {
     nodejs::run_raw(napi_reg_func)
@@ -26,11 +32,7 @@ unsafe extern "C" fn node_start(napi_reg_func: *mut c_void) -> i32 {
 
 pub unsafe fn main() -> i32 {
     let exec_dir =  std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
-
-    #[cfg(target_os = "macos")]
-    let res_path = macos_res_path();
-    #[cfg(not(target_os = "macos"))]
-    let res_path = exec_dir.clone();
+    let res_path = platform_res_path().unwrap_or_else(|| exec_dir.clone());
 
     let embedder_path_file = res_path.join("nodejs_embedder");
     let dylib_path = std::fs::read_to_string(embedder_path_file).unwrap();
